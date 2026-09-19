@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Notes Maker: turn a lecture PDF into study notes</title>
+
+  <!-- Fonts load from Google Fonts. If you're offline, the fallback fonts in style.css are used. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,500;7..72,700&family=Public+Sans:wght@400;500;600&display=swap">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="top">
+    <a class="brand" href="./">Notes Maker</a>
+    <p class="status" id="server-status" data-status="checking">
+      <span class="dot" aria-hidden="true"></span>
+      <span id="server-status-text">Checking server</span>
+    </p>
+  </header>
+
+  <main>
+    <section class="intro">
+      <h1>Turn a lecture PDF into study notes</h1>
+      <p>Upload a PDF and get a shorter one back, with the key topics, definitions and formulas and none of the filler.</p>
+    </section>
+
+    <!-- The sheet is the whole app. JS shows exactly one <div class="panel"> at a time. -->
+    <div class="sheet-wrap">
+      <section class="sheet" id="sheet" data-state="idle" aria-label="Make notes from a PDF">
+        <span class="margin-line" aria-hidden="true"></span>
+
+        <div class="sheet-body">
+
+          <!-- 1. Choose a file -->
+          <div class="panel" data-panel="idle">
+            <label class="dropzone" id="dropzone" for="file-input">
+              <input type="file" id="file-input" accept="application/pdf,.pdf">
+              <span class="dz-title">Drop your PDF here</span>
+              <span class="dz-sub">or <span class="dz-link">choose a file</span> from your computer</span>
+            </label>
+            <p class="hint">PDF files only, up to <span id="max-mb">25</span> MB. Scanned pages without selectable text can't be read.</p>
+            <p class="pick-msg" id="pick-msg" role="alert" hidden></p>
+          </div>
+
+          <!-- 2. File chosen, waiting for the button -->
+          <div class="panel" data-panel="ready" hidden>
+            <p class="panel-title" tabindex="-1" data-focus>Ready to make notes</p>
+            <p class="file-name" id="file-name"></p>
+            <p class="file-meta" id="file-meta"></p>
+            <div class="actions">
+              <button type="button" class="btn primary" id="make-btn">Make notes</button>
+              <button type="button" class="btn ghost" id="change-btn">Choose a different file</button>
+            </div>
+          </div>
+
+          <!-- 3. Waiting for the server -->
+          <div class="panel" data-panel="working" hidden>
+            <div class="lines" aria-hidden="true">
+              <span style="--i:0; --w:92%"></span>
+              <span style="--i:1; --w:78%"></span>
+              <span style="--i:2; --w:96%"></span>
+              <span style="--i:3; --w:58%"></span>
+              <span style="--i:4; --w:86%"></span>
+              <span style="--i:5; --w:42%"></span>
+            </div>
+            <p class="panel-title" tabindex="-1" data-focus>Writing your notes</p>
+            <p class="work-sub">Long PDFs are handled in sections, so this can take a few minutes. Keep this tab open.</p>
+            <p class="elapsed" aria-hidden="true">Working for <span id="elapsed">0:00</span></p>
+            <div class="actions">
+              <button type="button" class="btn ghost" id="cancel-btn">Cancel</button>
+            </div>
+          </div>
+
+          <!-- 4. Notes are ready -->
+          <div class="panel" data-panel="done" hidden>
+            <p class="panel-title" tabindex="-1" data-focus>Your notes are ready</p>
+            <p class="file-meta" id="done-name"></p>
+            <div class="actions">
+              <a class="btn primary" id="download-link" href="#" download="study-notes.pdf">Download notes</a>
+              <button type="button" class="btn ghost" id="again-btn">Make notes from another PDF</button>
+            </div>
+            <div class="preview">
+              <iframe id="preview" title="Preview of your study notes"></iframe>
+            </div>
+            <p class="preview-note">Preview not showing? <a id="open-link" href="#" target="_blank" rel="noopener">Open the notes in a new tab</a>.</p>
+          </div>
+
+          <!-- 5. Something went wrong -->
+          <div class="panel" data-panel="error" hidden>
+            <p class="panel-title error-title" tabindex="-1" data-focus id="error-title"></p>
+            <p class="error-body" id="error-body"></p>
+            <div class="actions">
+              <button type="button" class="btn primary" id="retry-btn">Try again</button>
+              <button type="button" class="btn ghost" id="error-change-btn">Choose a different file</button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </div>
+
+    <section class="about">
+      <h2>What's in the notes</h2>
+      <p>Each major topic in your PDF gets its own heading, with short bullet points underneath. Definitions and formulas are marked so you can spot them when you revise. Gemini writes the notes from the text in your PDF, so skim them before you rely on them.</p>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
