@@ -23,6 +23,11 @@ def extract_text(data:bytes):
         page_text:str = cast(str, page.get_text("text"))
         text += page_text
 
+    #checking if pdf is empty
+    if not text.strip():
+        print("text is empty.")
+        raise HTTPException(status_code=422, detail={"message":"pdf is empty"})
+    
     print("text extracted from pdf")
     return text
 

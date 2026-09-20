@@ -7,7 +7,7 @@
    ========================================================== */
 
 /* ---------- Step 1: settings you may want to change ---------- */
-const API_BASE = "https://ainotesmaker.onrender.com/";            // where uvicorn is running
+const API_BASE = "https://a-inotes-maker-chi.vercel.app/";            // your deployed backend (keep the trailing slash)
 const CREATE_NOTES_URL = `${API_BASE}file/create-notes`;
 const MAX_FILE_MB = 25;                              // stops huge uploads from costing you Gemini calls
 
@@ -40,9 +40,6 @@ const errorBody = $("error-body");
 const retryBtn = $("retry-btn");
 const errorChangeBtn = $("error-change-btn");
 
-const serverStatus = $("server-status");
-const serverStatusText = $("server-status-text");
-
 $("max-mb").textContent = MAX_FILE_MB;
 
 /* ---------- Step 3: what the page remembers ---------- */
@@ -63,22 +60,6 @@ function setState(state, { focus = true } = {}) {
   if (focus) {
     const heading = document.querySelector(`.panel[data-panel="${state}"] [data-focus]`);
     if (heading) heading.focus();
-  }
-}
-
-/* ---------- Step 5: check that the backend is running ---------- */
-async function checkServer() {
-  serverStatus.dataset.status = "checking";
-  serverStatusText.textContent = "Checking server";
-  try {
-    // Your main.py answers GET / with {"message": "system is running"}
-    const response = await fetch(`${API_BASE}/`, { signal: AbortSignal.timeout(4000) });
-    if (!response.ok) throw new Error(`Status ${response.status}`);
-    serverStatus.dataset.status = "online";
-    serverStatusText.textContent = "Server online";
-  } catch {
-    serverStatus.dataset.status = "offline";
-    serverStatusText.textContent = "Server not reachable";
   }
 }
 
@@ -242,7 +223,7 @@ function showError(error) {
         break;
       case 500:
         title = "The server hit an error";
-        body = "Check the terminal running uvicorn for the error message. A damaged PDF is a common cause.";
+        body = "The server hit an error while making your notes. A damaged or scanned PDF is a common cause, so try a different PDF.";
         break;
       default:
         title = `Something went wrong (status ${error.status})`;
@@ -251,8 +232,7 @@ function showError(error) {
   } else {
     // fetch() itself failed: the server is off, the address is wrong, or the connection dropped.
     title = "Can't reach the server";
-    body = `The page couldn't connect to ${API_BASE}. Start the backend with "uvicorn main:app --reload" in the AINOtesMaker folder, then try again.`;
-    checkServer();
+    body = "The page couldn't connect to the server. Check your internet connection, wait a moment, then try again.";
   }
 
   errorTitle.textContent = title;
@@ -302,4 +282,3 @@ window.addEventListener("beforeunload", (event) => {
 
 /* ---------- Go ---------- */
 setState("idle", { focus: false });
-checkServer();
