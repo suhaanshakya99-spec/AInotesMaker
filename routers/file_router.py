@@ -1,13 +1,15 @@
-from fastapi import (APIRouter, UploadFile, HTTPException)
+from fastapi import (APIRouter, UploadFile, HTTPException, Request)
 from services.ai_services import (extract_text, generate_notes_using_chuncks, chunking_text, create_notes_pdf, create_output_response)
 from fastapi.responses import JSONResponse
+from config.limiter import limiter
 
 router = APIRouter(prefix="/file", tags=["file-handling"])
 
+@limiter.limit("5/minute")
 @router.post("/create-notes")
-async def upload_pdf(file:UploadFile):
+async def upload_pdf(file:UploadFile, request:Request):
 
-    if not file.content_type == "pdf":
+    if file.content_type != "application/pdf":
         raise HTTPException(status_code=415, detail={"message":"not pdf file"})
 
     pdf_byte = await file.read()

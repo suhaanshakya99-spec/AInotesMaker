@@ -7,7 +7,7 @@
    ========================================================== */
 
 /* ---------- Step 1: settings you may want to change ---------- */
-const API_BASE = "https://a-inotes-maker-chi.vercel.app/";            // your deployed backend (keep the trailing slash)
+const API_BASE = "http://127.0.0.1:8000/";            // your deployed backend (keep the trailing slash)
 const CREATE_NOTES_URL = `${API_BASE}file/create-notes`;
 const MAX_FILE_MB = 25;                              // stops huge uploads from costing you Gemini calls
 

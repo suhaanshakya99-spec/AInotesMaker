@@ -80,34 +80,37 @@ async def interact_wtih_gemini(text:str, client:AsyncOpenAI):
             attempts+=1
             continue
 
-        
-        return response.choices[0].message.content
+        content = response.choices[0].message.content
 
-    return {"message":f"failed after max attempts"}
+        if content is None:
+            raise HTTPException(status_code=500, detail="gemini resturned empty")
+    
+        return content
+
+    raise HTTPException(status_code=429, detail="max attempt reached, could not create")
 
 
 
 """
 using chuncks to create notes, from chunking_text()
+tasks -> creates coroutine of all chunks in a list
+asyncio.gather -> concurrently runs the coroutine and returns a list
+.join -> a built-in string method used to combine a collection of strings into a single string
 """
 async def generate_notes_using_chuncks(data:list):
 
     client = AsyncOpenAI(api_key=settings.GEMINI_API_KEY,
                     base_url="https://generativelanguage.googleapis.com/v1beta/openai/")
     
-    all_notes = []
-    number_of_chunks = 1
-    for chunk in data:
-        notes = await interact_wtih_gemini(chunk, client)
+    tasks = [interact_wtih_gemini(text, client) for text in data]
+    result = await asyncio.gather(*tasks)
 
-        if isinstance(notes, dict) or notes is None:
-            raise HTTPException(status_code=502, detail="failed to create notes.")
-        else:
-            print(f"{number_of_chunks} proccessed.")
+    combined_notes = "\n\n".join(result)
 
-        all_notes.append(notes)
+    final_notes = await interact_wtih_gemini(f"combine these notes {combined_notes}", client)
 
-    return "\n".join(all_notes)
+    return final_notes
+
 
 
 """
@@ -148,5 +151,4 @@ def create_output_response(data:bytearray, filename:str="study-notes.pdf"):
                         headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
     return response
-
 
