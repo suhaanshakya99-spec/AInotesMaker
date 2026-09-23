@@ -11,6 +11,7 @@ from fpdf.enums import WrapMode
 import asyncio
 import os
 from openai import OpenAIError
+from pymupdf import Page
 
 """
 extracting text from pdf using bytes from fastapi UploadFile class .read()
@@ -20,6 +21,7 @@ def extract_text(data:bytes):
 
     doc = pymupdf.open(stream=data, filetype="pdf")
     for page in doc:
+        page:Page
         page_text:str = cast(str, page.get_text("text"))
         text += page_text
 
